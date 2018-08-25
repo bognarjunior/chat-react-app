@@ -18,11 +18,7 @@ export default class LoginForm extends Component {
     socket.emit(VERIFY_USER, nickname, this.setUser);
   }
 
-  handleChange = (e) => {
-    this.setState({
-      nickname: e.target.value
-    });
-  }
+  handleChange = (e) => this.setState({ nickname: e.target.value });
   
   setUser = ({ user, isUser }) => {
     if (isUser) {
@@ -31,6 +27,8 @@ export default class LoginForm extends Component {
       this.props.setUser(user);
     }
   }
+
+  setError = (error) => this.setState({ error });
 
   render() {
     const { nickname, error } = this.state;
