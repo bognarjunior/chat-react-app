@@ -1,4 +1,5 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
+import { VERIFY_USER } from './../../Events';
 
 export default class LoginForm extends Component {
   constructor(props) {
@@ -9,7 +10,28 @@ export default class LoginForm extends Component {
       error: null
     }
   }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const { socket } = this.props;
+    const { nickname } = this.state;
+    socket.emit(VERIFY_USER, nickname, this.setUser);
+  }
+
+  handleChange = (e) => {
+    this.setState({
+      nickname: e.target.value
+    });
+  }
   
+  setUser = ({ user, isUser }) => {
+    if (isUser) {
+      this.setError("Apelido já utilizado");
+    } else {
+      this.props.setUser(user);
+    }
+  }
+
   render() {
     const { nickname, error } = this.state;
     return (
