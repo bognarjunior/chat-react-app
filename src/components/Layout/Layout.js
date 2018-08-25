@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import io from 'socket.io-client';
 
+import { USER_CONNECTED, LOGOUT } from './../../Events';
+
 const socketURL = "http://192.168.15.13:3231/";
 
 export default class Layout extends Component {
@@ -9,14 +11,14 @@ export default class Layout extends Component {
     super(props);
   
     this.state = {
-       socket: null
+       socket: null,
+       user: null
     }
   }
 
   componentDidMount = () => {
     this.initSocket();
   }
-  
   
   initSocket = () => {
     const socket = io(socketURL);
@@ -28,6 +30,22 @@ export default class Layout extends Component {
     })
     this.setState({
       socket
+    })
+  }
+
+  setUser = (user) => {
+    const { socket } = this.state;
+    socket.emit(USER_CONNECTED, user);
+    this.setState({
+      user
+    })
+  }
+
+  logout = () => {
+    const { socket } = this.state;
+    socket.emit(LOGOUT);
+    this.setState({
+      user: null
     })
   }
 
