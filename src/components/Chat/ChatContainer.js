@@ -4,7 +4,8 @@ import {
   COMMUNITY_CHAT,
   MESSAGE_SENT,
   MESSAGE_RECIEVED,
-  TYPING
+	TYPING,
+	PRIVATE_MESSAGE
 } from './../../Events';
 
 import Sidebar from './SideBar';
@@ -25,7 +26,16 @@ export default class ChatContainer extends Component {
   
   componentDidMount() {
 		const { socket } = this.props;
+		this.initSocket(socket);
+	}
+
+	initSocket = (socket) => {
 		socket.emit(COMMUNITY_CHAT, this.resetChat);
+		socket.on(PRIVATE_MESSAGE, this.addChat);
+
+		socket.on('connect', () => {
+			socket.emit(COMMUNITY_CHAT, this.resetChat);
+		});
 	}
 
 	/**	
@@ -45,7 +55,7 @@ export default class ChatContainer extends Component {
 	 *	@param chat {Chat} Chat que foi adicionado
 	 *	@param reset {boolean} se true irá definir o chat como o único chat
 	 */
-	addChat = (chat, reset) => {
+	addChat = (chat, reset = false) => {
 		const { socket } = this.props;
 		const { chats } = this.state;
 
@@ -100,8 +110,11 @@ export default class ChatContainer extends Component {
 						}
 					}
 					return chat
+				});
+				
+				this.setState({
+					chats:newChats
 				})
-				this.setState({chats:newChats})
 			}
 		}
   }
@@ -117,7 +130,7 @@ export default class ChatContainer extends Component {
 	}
 
 	/**	
-   * Sends typing status to server.
+   * Manda para o servidor o status escrevendo
 	 * @param	chatId {number} Id do chat
 	 * @param	typing {boolean} Se o usuário está digitando ou não
 	 */
@@ -127,6 +140,15 @@ export default class ChatContainer extends Component {
   }
   
   setActiveChat = (activeChat) => this.setState({ activeChat });
+
+	/**	
+   * Chama a função para enviar mensagem privada
+	 * @param	reciever {string} nome de quem receberá a mensagem
+	 */
+	sendOpenPrivateMessage = (reciever) => {
+		const { socket, user } = this.props
+		socket.emit(PRIVATE_MESSAGE, {reciever, sender:user.name})
+	}
 
   render() {
     const { user, logout} = this.props;
@@ -140,6 +162,7 @@ export default class ChatContainer extends Component {
           user={user}
           activeChat={activeChat}
           setActiveChat={this.setActiveChat}
+					onSendOpenPrivateMessage={this.sendOpenPrivateMessage}
         />
         <div className="chat-room-container">
         {

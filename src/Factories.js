@@ -8,10 +8,11 @@ const getTime = (date)=> `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)
  * @param {object} 
  * 	name {string}
  */
-const createUser = ({name}) => (
+const createUser = ({name, socketId = null}) => (
 	 {
 		id: uuidv4(),
-		name
+		name,
+		socketId
 	}
 );
 

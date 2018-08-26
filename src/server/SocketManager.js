@@ -8,7 +8,8 @@ const {
   COMMUNITY_CHAT,
   MESSAGE_RECIEVED,
   MESSAGE_SENT,
-  TYPING
+  TYPING,
+  PRIVATE_MESSAGE
 } = require('./../Events');
 
 const { createChat, createMessage, createUser } = require('./../Factories');
@@ -22,7 +23,7 @@ module.exports = function(socket){
   let sendMessageToChatFromUser;
   let sendTypingFromUser;
 
-  //Get Community Chat
+  // Chama o chat global
 	socket.on(COMMUNITY_CHAT, (callback)=>{
 		callback(communityChat)
   })
@@ -41,7 +42,8 @@ module.exports = function(socket){
       callback({
         isUser: false,
         user: createUser({
-          name: nickname
+          name: nickname,
+          socketId: socket.id
         })
       })
     }
@@ -49,6 +51,7 @@ module.exports = function(socket){
 
   // Ação para conectar o usuário
   socket.on(USER_CONNECTED, (user) => {
+    user.socketId = socket.id;
     connectedUsers = addUser(connectedUsers, user);
     socket.user = user;
 
@@ -74,12 +77,27 @@ module.exports = function(socket){
 		io.emit(USER_DISCONNECTED, connectedUsers);
   });
   
+  // Manda a mensagem
   socket.on(MESSAGE_SENT, ({chatId, message}) => {
 		sendMessageToChatFromUser(chatId, message)
   });
   
+  // Dispara o evento que fala que o usuário está escrevendo
   socket.on(TYPING, ({chatId, isTyping}) => {
 		sendTypingFromUser(chatId, isTyping);
+  });
+  
+  // Cria um chat privado
+  socket.on(PRIVATE_MESSAGE, ({reciever, sender}) => {
+		if (reciever in  connectedUsers) {
+      const newChat = createChat({
+        name: `Chat privado ${reciever} e ${sender}`,
+        users: [reciever, sender]
+      });
+      const recieverSocket = connectedUsers[reciever].socketId;
+      socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat);
+      socket.emit(PRIVATE_MESSAGE, newChat);
+    }
 	});
 }
 

@@ -9,7 +9,22 @@ import {
 import { MdEject } from 'react-icons/md';
 
 export default class SideBar extends Component{
-		
+  constructor(props) {
+    super(props)
+  
+    this.state = {
+      reciever: ""
+    }
+  }
+
+  handleSubmit = (e) => {
+    e.preventDefault();
+    const { reciever } = this.state;
+    const { onSendOpenPrivateMessage } = this.props;
+
+    onSendOpenPrivateMessage(reciever);
+  }
+    
 	render() {
 
 		const {
@@ -20,6 +35,8 @@ export default class SideBar extends Component{
       logout
     } = this.props;
 
+    const { reciever } = this.state;
+
 		return (
 			<div id="side-bar">
         <div className="heading">
@@ -28,11 +45,18 @@ export default class SideBar extends Component{
             <FaListUl />
           </div>
         </div>
-        <div className="search">
+        <form onSubmit={this.handleSubmit} className="search">
           <i className="search-icon"><FaSearch /></i>
-          <input placeholder="Search" type="text"/>
+          <input 
+            placeholder="Search" 
+            type="text"
+            value={reciever}
+            onChange={(e) => this.setState({ 
+              reciever: e.target.value 
+            })}
+          />
           <div className="plus"></div>
-        </div>
+        </form>
         <div 
           className="users" 
           ref='users' 
@@ -45,9 +69,9 @@ export default class SideBar extends Component{
 
               if (chat.name) {
                 const lastMessage = chat.messages[chat.messages.length - 1];
-                const user = chat.users.find(({name}) => {
-                  return name !== this.props.name
-                }) || { name:"Global" }
+                const chatName = chat.users.find((name) => {
+                  return name !== user.name
+                }) || "Global"
                 const classNames = (activeChat && activeChat.id === chat.id) ? 'active' : ''
                 
                 return (
@@ -57,11 +81,11 @@ export default class SideBar extends Component{
                     onClick={ ()=>{ setActiveChat(chat) } }
                   >
                     <div className="user-photo">
-                      {user.name[0].toUpperCase()}
+                      {chatName[0].toUpperCase()}
                     </div>
                     <div className="user-info">
                       <div className="name">
-                        {user.name}
+                        {chatName}
                       </div>
                       {lastMessage && <div className="last-message">{lastMessage.message}</div>}
                     </div>   
