@@ -21,9 +21,13 @@ export default class LoginForm extends Component {
   handleChange = (e) => this.setState({ nickname: e.target.value });
   
   setUser = ({ user, isUser }) => {
+    console.log('====================================');
+    console.log(user, isUser);
+    console.log('====================================');
     if (isUser) {
       this.setError("Apelido já utilizado");
     } else {
+      this.setError(null)
       this.props.setUser(user);
     }
   }
@@ -47,9 +51,13 @@ export default class LoginForm extends Component {
             placeholder={'Digite um apelido'}
           >
           </input>
-          <div className="error">
-            {error ? error : null}
-          </div>
+          {
+            error ?
+            <div className="error">
+              { error }
+            </div>
+            : null
+          }
         </form>
       </div>
     )
