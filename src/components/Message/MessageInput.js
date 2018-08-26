@@ -1,10 +1,10 @@
 import React, { Component } from 'react'
 
-export default class ChatHeading extends Component {
+export default class MessageInput extends Component {
   render() {
     return (
       <div>
-        Chat Heading
+        Message input
       </div>
     )
   }

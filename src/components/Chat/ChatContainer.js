@@ -9,6 +9,9 @@ import {
 
 import Sidebar from './SideBar';
 import ChatHeading from './ChatHeading';
+import Messages from './../Message/Messages';
+import MessageInput from './../Message/MessageInput';
+
 
 export default class ChatContainer extends Component {
   constructor(props) {
