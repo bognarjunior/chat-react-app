@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import {
   FaChevronDown, 
-  FaBars, 
+  FaListUl, 
   FaSearch, 
 } from 'react-icons/fa';
 
@@ -25,7 +25,7 @@ export default class SideBar extends Component{
         <div className="heading">
           <div className="app-name">Chat <FaChevronDown /></div>
           <div className="menu">
-            <FaBars />
+            <FaListUl />
           </div>
         </div>
         <div className="search">

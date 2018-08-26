@@ -1,4 +1,7 @@
-import React from 'react'
+import React from 'react';
+import { FaVideo } from 'react-icons/fa';
+import { FaUserPlus } from 'react-icons/fa';
+import { MdMenu } from 'react-icons/md';
 
 export default ({name, numberOfUsers}) => {
   return (
@@ -15,6 +18,11 @@ export default ({name, numberOfUsers}) => {
             : null
           }
         </div>
+      </div>
+      <div className="options">
+        <FaVideo />
+        <FaUserPlus />
+        <MdMenu />
       </div>
     </div>
   )
