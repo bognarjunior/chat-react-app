@@ -71,7 +71,7 @@ module.exports = function(socket){
 		io.emit(USER_DISCONNECTED, connectedUsers);
   });
   
-  socket.on(MESSAGE_SENT, ({chatId, message})=>{
+  socket.on(MESSAGE_SENT, ({chatId, message}) => {
 		sendMessageToChatFromUser(chatId, message)
 	});
 }
