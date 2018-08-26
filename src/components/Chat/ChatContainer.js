@@ -146,8 +146,14 @@ export default class ChatContainer extends Component {
 	 * @param	reciever {string} nome de quem receberá a mensagem
 	 */
 	sendOpenPrivateMessage = (reciever) => {
-		const { socket, user } = this.props
-		socket.emit(PRIVATE_MESSAGE, {reciever, sender:user.name})
+		const { socket, user } = this.props;
+		const { activeChat } = this.state;
+
+ 		socket.emit(PRIVATE_MESSAGE, {
+			reciever, 
+			sender:user.name,
+			activeChat
+		});
 	}
 
   render() {

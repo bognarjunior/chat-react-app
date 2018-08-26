@@ -88,15 +88,22 @@ module.exports = function(socket){
   });
   
   // Cria um chat privado
-  socket.on(PRIVATE_MESSAGE, ({reciever, sender}) => {
+  socket.on(PRIVATE_MESSAGE, ({reciever, sender, activeChat}) => {
 		if (reciever in  connectedUsers) {
-      const newChat = createChat({
-        name: `Chat privado ${reciever} e ${sender}`,
-        users: [reciever, sender]
-      });
+
       const recieverSocket = connectedUsers[reciever].socketId;
-      socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat);
-      socket.emit(PRIVATE_MESSAGE, newChat);
+      
+      if(activeChat === null || activeChat.id === communityChat.id){
+        const newChat = createChat({
+          name: `Chat privado ${reciever} e ${sender}`,
+          users: [reciever, sender]
+        });
+
+        socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat);
+        socket.emit(PRIVATE_MESSAGE, newChat);
+      }else{
+        socket.to(recieverSocket).emit(PRIVATE_MESSAGE, activeChat)
+      }
     }
 	});
 }

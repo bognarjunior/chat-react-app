@@ -23,6 +23,10 @@ export default class SideBar extends Component{
     const { onSendOpenPrivateMessage } = this.props;
 
     onSendOpenPrivateMessage(reciever);
+
+    this.setState({
+      reciever: ""
+    })
   }
     
 	render() {
