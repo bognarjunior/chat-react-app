@@ -3,8 +3,8 @@ const getTime = (date)=> `${date.getHours()}:${("0"+date.getMinutes()).slice(-2)
 
 /**	
  * Cria o usuário
- * @prop id {string}
- * @prop name {string}
+ * @prop id {string} id do usuário
+ * @prop name {string} nome que aparecerá logado
  * @param {object} 
  * 	name {string}
  */
@@ -18,9 +18,9 @@ const createUser = ({name}) => (
 /**	
  * Cria a mensagem
  * @prop id {string}
- * @prop time {Date} the time in 24hr format i.e. 14:22
- * @prop message {string} actual string message
- * @prop sender {string} sender of the message
+ * @prop time {Date} data formato de 24 horas
+ * @prop message {string} mensagem
+ * @prop sender {string} quem enviou a mensagem
  * @param {object} 
  *	message {string}
  *	sender {string}
@@ -40,15 +40,15 @@ const createMessage = ({message, sender})=>{
  * @prop name {string}
  * @prop messages {Array.Message}
  * @prop users {Array.string}
- *	@prop addMessage {function} adds message to chat.
- *	@prop addTypingUser {function} adds a username to typing users of chat.
- *	@prop removeTypingUser {function} removes a username to typing users of chat.
- *	@param {object} 
+ * @prop addMessage {function} adiciona mensagem no chat
+ * @prop addTypingUser {function} adiciona o nome do usuário que está digitando
+ * @prop removeTypingUser {function} remove o nome do usuário que está digitando
+ * @param {object} 
  *		messages {Array.Message}
  *		name {string}
  *		users {Array.string} 
  */
-const createChat = ({messages = [], name="Community", users=[]} = {})=>(
+const createChat = ({messages = [], name="Global", users=[]} = {})=>(
 	{
 		id: uuidv4(),
 		name,

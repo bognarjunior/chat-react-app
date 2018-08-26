@@ -1,13 +1,19 @@
 const io = require('./index').io;
 
-const { VERIFY_USER, USER_CONNECTED, LOGOUT } = require('./../Events');
+const { VERIFY_USER, USER_CONNECTED, LOGOUT, COMMUNITY_CHAT } = require('./../Events');
 const { createChat, createMessage, createUser } = require('./../Factories');
 
 let connectedUser = {};
+let communityChat = createChat();
 
 module.exports = function(socket){
   console.log(`Socket id: ${socket.id}`);
 
+  //Get Community Chat
+	socket.on(COMMUNITY_CHAT, (callback)=>{
+		callback(communityChat)
+  })
+  
   // Se o socket recebeu a chamada de verificar 
   socket.on(VERIFY_USER, (nickname, callback) => {
     // Já existe usuário
