@@ -1,6 +1,15 @@
 const io = require('./index').io;
 
-const { VERIFY_USER, USER_CONNECTED, USER_DISCONNECTED, LOGOUT, COMMUNITY_CHAT } = require('./../Events');
+const {
+  VERIFY_USER,
+  USER_CONNECTED,
+  USER_DISCONNECTED,
+  LOGOUT,
+  COMMUNITY_CHAT,
+  MESSAGE_RECIEVED,
+  MESSAGE_SENT
+} = require('./../Events');
+
 const { createChat, createMessage, createUser } = require('./../Factories');
 
 let connectedUsers = {};
@@ -8,6 +17,8 @@ let communityChat = createChat();
 
 module.exports = function(socket){
   console.log(`Socket id: ${socket.id}`);
+  
+  let sendMessageToChatFromUser;
 
   //Get Community Chat
 	socket.on(COMMUNITY_CHAT, (callback)=>{
@@ -38,7 +49,12 @@ module.exports = function(socket){
   socket.on(USER_CONNECTED, (user) => {
     connectedUsers = addUser(connectedUsers, user);
     socket.user = user;
-  })
+
+    sendMessageToChatFromUser = sendMessageToChat(user.name)
+
+		io.emit(USER_CONNECTED, connectedUsers)
+		console.log(connectedUsers);
+  });
 
   // Chama a função quando o usuário é desconectado do chat
   // Cai a internet ou refresh na página 
@@ -47,13 +63,17 @@ module.exports = function(socket){
       connectedUsers = removeUser(connectedUsers, socket.user.name);
       io.emit(USER_DISCONNECTED, connectedUsers);
     }
-  })
+  });
 
   // Ação para desconectar o usuário
 	socket.on(LOGOUT, () => {
 		connectedUsers = removeUser(connectedUsers, socket.user.name)
 		io.emit(USER_DISCONNECTED, connectedUsers);
-	})
+  });
+  
+  socket.on(MESSAGE_SENT, ({chatId, message})=>{
+		sendMessageToChatFromUser(chatId, message)
+	});
 }
 
 /** 
@@ -62,7 +82,7 @@ module.exports = function(socket){
  * @param username {String} usuário que será validado
  * @return userList {Object} Objeto de usuários
  */
-function isUser(userList, username){
+function isUser(userList, username) {
   return username in userList
 }
 
@@ -84,8 +104,20 @@ function removeUser(userList, username) {
  * @param user {User} usuário que será adicionado na lista
  * @return userList {Object} Objeto de usuários
  */
-function addUser(userList, user){
+function addUser(userList, user) {
   let newList = Object.assign({}, userList)
   newList[user.name] = user
   return newList
+}
+
+/** 
+ * Retorna uma função que levará o id do chat e uma mensagem
+ * em seguida, emiti a mensagem para o chat
+ * @param sender {string} usuários que mandou a mensagem
+ * @return function(chatId, message)
+ */
+function sendMessageToChat(sender) {
+	return (chatId, message) => {
+		io.emit(`${MESSAGE_RECIEVED}-${chatId}`, createMessage({message, sender}));
+	}
 }
