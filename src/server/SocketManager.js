@@ -7,7 +7,8 @@ const {
   LOGOUT,
   COMMUNITY_CHAT,
   MESSAGE_RECIEVED,
-  MESSAGE_SENT
+  MESSAGE_SENT,
+  TYPING
 } = require('./../Events');
 
 const { createChat, createMessage, createUser } = require('./../Factories');
@@ -19,6 +20,7 @@ module.exports = function(socket){
   console.log(`Socket id: ${socket.id}`);
   
   let sendMessageToChatFromUser;
+  let sendTypingFromUser;
 
   //Get Community Chat
 	socket.on(COMMUNITY_CHAT, (callback)=>{
@@ -50,7 +52,8 @@ module.exports = function(socket){
     connectedUsers = addUser(connectedUsers, user);
     socket.user = user;
 
-    sendMessageToChatFromUser = sendMessageToChat(user.name)
+    sendMessageToChatFromUser = sendMessageToChat(user.name);
+    sendTypingFromUser = sendTypingToChat(user.name);
 
 		io.emit(USER_CONNECTED, connectedUsers)
 		console.log(connectedUsers);
@@ -73,6 +76,10 @@ module.exports = function(socket){
   
   socket.on(MESSAGE_SENT, ({chatId, message}) => {
 		sendMessageToChatFromUser(chatId, message)
+  });
+  
+  socket.on(TYPING, ({chatId, isTyping}) => {
+		sendTypingFromUser(chatId, isTyping);
 	});
 }
 
@@ -119,5 +126,16 @@ function addUser(userList, user) {
 function sendMessageToChat(sender) {
 	return (chatId, message) => {
 		io.emit(`${MESSAGE_RECIEVED}-${chatId}`, createMessage({message, sender}));
+	}
+}
+
+/** 
+ * Retorna uma função que verifica se o usuário está digitando
+ * @param user {string} usuário que esta verificando
+ * @return function(chatId, message)
+ */
+function sendTypingToChat(user) {
+	return (chatId, isTyping) => {
+		io.emit(`${TYPING}-${chatId}`, {user, isTyping})
 	}
 }
