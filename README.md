@@ -27,3 +27,7 @@ https://facebook.github.io/react/
 Socket.io
 
 https://socket.io
+
+React icons 
+
+npm install react-icons --save
