@@ -1,9 +1,9 @@
 const io = require('./index').io;
 
-const { VERIFY_USER, USER_CONNECTED, LOGOUT, COMMUNITY_CHAT } = require('./../Events');
+const { VERIFY_USER, USER_CONNECTED, USER_DISCONNECTED, LOGOUT, COMMUNITY_CHAT } = require('./../Events');
 const { createChat, createMessage, createUser } = require('./../Factories');
 
-let connectedUser = {};
+let connectedUsers = {};
 let communityChat = createChat();
 
 module.exports = function(socket){
@@ -17,7 +17,7 @@ module.exports = function(socket){
   // Se o socket recebeu a chamada de verificar 
   socket.on(VERIFY_USER, (nickname, callback) => {
     // Já existe usuário
-    if (isUser(connectedUser, nickname)) {
+    if (isUser(connectedUsers, nickname)) {
       // retorna true e usuário vazio
       callback({
         isUser: true,
@@ -34,13 +34,26 @@ module.exports = function(socket){
     }
   });
 
+  // Ação para conectar o usuário
   socket.on(USER_CONNECTED, (user) => {
-    connectedUser = addUser(connectedUser, user);
+    connectedUsers = addUser(connectedUsers, user);
     socket.user = user;
-    console.log('====================================')
-    console.log(connectedUser)
-    console.log('====================================')
   })
+
+  // Chama a função quando o usuário é desconectado do chat
+  // Cai a internet ou refresh na página 
+  socket.on('disconnect', () => {
+    if ("user" in socket) {
+      connectedUsers = removeUser(connectedUsers, socket.user.name);
+      io.emit(USER_DISCONNECTED, connectedUsers);
+    }
+  })
+
+  // Ação para desconectar o usuário
+	socket.on(LOGOUT, () => {
+		connectedUsers = removeUser(connectedUsers, socket.user.name)
+		io.emit(USER_DISCONNECTED, connectedUsers);
+	})
 }
 
 /** 
