@@ -9,7 +9,8 @@ const {
   MESSAGE_RECIEVED,
   MESSAGE_SENT,
   TYPING,
-  PRIVATE_MESSAGE
+  PRIVATE_MESSAGE,
+  NEW_CHAT_USER
 } = require('./../Events');
 
 const { createChat, createMessage, createUser } = require('./../Factories');
@@ -102,7 +103,23 @@ module.exports = function(socket){
         socket.to(recieverSocket).emit(PRIVATE_MESSAGE, newChat);
         socket.emit(PRIVATE_MESSAGE, newChat);
       }else{
-        socket.to(recieverSocket).emit(PRIVATE_MESSAGE, activeChat)
+        if (!(reciever in activeChat.users)) {
+          activeChat.users
+            .filter(user => user in connectedUsers)
+            .map(user => connectedUsers[user])
+            .map(user => {
+              socket.to(user.socketId).emit(NEW_CHAT_USER, {
+                chatId: activeChat.id,
+                newUser: reciever
+              });
+            });
+            
+            socket.emit(NEW_CHAT_USER, {
+              chatId: activeChat.id,
+              newUser: reciever
+            });
+        }
+        socket.to(recieverSocket).emit(PRIVATE_MESSAGE, activeChat);
       }
     }
 	});
@@ -115,7 +132,7 @@ module.exports = function(socket){
  * @return userList {Object} Objeto de usuários
  */
 function isUser(userList, username) {
-  return username in userList
+  return username in userList;
 }
 
 /** 
@@ -125,9 +142,9 @@ function isUser(userList, username) {
  * @return userList {Object} Objeto de usuários
  */
 function removeUser(userList, username) {
-  let newList = Object.assign({}, userList)
-  delete newList[username]
-  return newList
+  let newList = Object.assign({}, userList);
+  delete newList[username];
+  return newList;
 }
 
 /** 
@@ -137,9 +154,9 @@ function removeUser(userList, username) {
  * @return userList {Object} Objeto de usuários
  */
 function addUser(userList, user) {
-  let newList = Object.assign({}, userList)
-  newList[user.name] = user
-  return newList
+  let newList = Object.assign({}, userList);
+  newList[user.name] = user;
+  return newList;
 }
 
 /** 
@@ -161,6 +178,6 @@ function sendMessageToChat(sender) {
  */
 function sendTypingToChat(user) {
 	return (chatId, isTyping) => {
-		io.emit(`${TYPING}-${chatId}`, {user, isTyping})
+		io.emit(`${TYPING}-${chatId}`, {user, isTyping});
 	}
 }
