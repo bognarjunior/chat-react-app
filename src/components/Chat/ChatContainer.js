@@ -1,14 +1,17 @@
 import React, { Component } from 'react'
+import { values } from 'lodash'
 
 import {
   COMMUNITY_CHAT,
   MESSAGE_SENT,
   MESSAGE_RECIEVED,
 	TYPING,
-	PRIVATE_MESSAGE
+	PRIVATE_MESSAGE,
+	USER_CONNECTED, 
+	USER_DISCONNECTED
 } from './../../Events';
 
-import Sidebar from './SideBar';
+import Sidebar from '../SideBar/SideBar';
 import ChatHeading from './ChatHeading';
 import Messages from './../Message/Messages';
 import MessageInput from './../Message/MessageInput';
@@ -19,7 +22,8 @@ export default class ChatContainer extends Component {
     super(props)
   
     this.state = {
-      chats: [],
+			chats: [],
+			users:[],
       activeChat: null
     }
   }
@@ -29,6 +33,13 @@ export default class ChatContainer extends Component {
 		this.initSocket(socket);
 	}
 
+	componentWillUnmount() {
+		const { socket } = this.props;
+		socket.off(PRIVATE_MESSAGE);
+		socket.off(USER_CONNECTED);
+		socket.off(USER_DISCONNECTED);
+	}
+
 	initSocket = (socket) => {
 		socket.emit(COMMUNITY_CHAT, this.resetChat);
 		socket.on(PRIVATE_MESSAGE, this.addChat);
@@ -36,6 +47,19 @@ export default class ChatContainer extends Component {
 		socket.on('connect', () => {
 			socket.emit(COMMUNITY_CHAT, this.resetChat);
 		});
+
+		socket.on(USER_CONNECTED, (users)=>{
+			this.setState({ 
+				users: values(users) 
+			});
+		});
+
+		socket.on(USER_DISCONNECTED, (users)=>{
+			this.setState({ 
+				users: values(users) 
+			});	
+		});
+
 	}
 
 	/**	
@@ -157,8 +181,13 @@ export default class ChatContainer extends Component {
 	}
 
   render() {
-    const { user, logout} = this.props;
-    const { chats, activeChat } = this.state;
+		const { user, logout} = this.props;
+		
+    const {
+			chats,
+			activeChat, 
+			users 
+		} = this.state;
 
     return (
       <div className="container">
@@ -166,6 +195,7 @@ export default class ChatContainer extends Component {
           logout={logout}
           chats={chats}
           user={user}
+					users={users}
           activeChat={activeChat}
           setActiveChat={this.setActiveChat}
 					onSendOpenPrivateMessage={this.sendOpenPrivateMessage}

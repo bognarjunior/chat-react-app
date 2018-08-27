@@ -31,3 +31,7 @@ https://socket.io
 React icons 
 
 npm install react-icons --save
+
+Lodash
+
+npm i --save lodash

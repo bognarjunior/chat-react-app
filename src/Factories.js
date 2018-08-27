@@ -41,6 +41,7 @@ const createMessage = ({message, sender})=>{
  * @prop name {string}
  * @prop messages {Array.Message}
  * @prop users {Array.string}
+ * @prop isCommunity {boolean}
  * @prop addMessage {function} adiciona mensagem no chat
  * @prop addTypingUser {function} adiciona o nome do usuário que está digitando
  * @prop removeTypingUser {function} remove o nome do usuário que está digitando
@@ -49,12 +50,13 @@ const createMessage = ({message, sender})=>{
  *		name {string}
  *		users {Array.string} 
  */
-const createChat = ({messages = [], name="Global", users=[]} = {})=>(
+const createChat = ({messages = [], name="Global", users=[], isCommunity = false} = {})=>(
 	{
 		id: uuidv4(),
-		name,
+		name: isCommunity ? name : createChatNameFromUsers(users),
 		messages,
 		users,
+		isCommunity,
 		typingUsers: [],
 
 		addMessage: (messages, message)=>{
@@ -70,8 +72,18 @@ const createChat = ({messages = [], name="Global", users=[]} = {})=>(
 	}
 )
 
+/** 
+* @param users {Array.string} Lista de usuários
+* @param excludedUser {string} Usuário para excluir da lista
+* @return {string} Nomes dos usuários concatenados por ' - ' ou "Chat vazio" se não tiver ninguém
+*/
+const createChatNameFromUsers = (users, excludedUser = "") => {
+	return users.filter(u => u !== excludedUser).join(' - ') || "Chat vazio"
+}
+
 module.exports = {
 	createChat,
 	createMessage,
-	createUser
+	createUser,
+	createChatNameFromUsers
 }
